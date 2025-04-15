@@ -13,7 +13,7 @@ public class Factory {
         return product;
     }
 
-    public static ProductDto createProductDTO() {
+    public static ProductDto createProductDto() {
         Product product = createProduct();
         return new ProductDto(product, product.getCategories());
     }
