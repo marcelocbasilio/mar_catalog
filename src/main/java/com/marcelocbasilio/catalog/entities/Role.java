@@ -3,7 +3,9 @@ package com.marcelocbasilio.catalog.entities;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "tb_role")
@@ -14,6 +16,9 @@ public class Role implements Serializable {
     private Long id;
     private String authority;
 
+    @ManyToMany(mappedBy = "roles")
+    private final Set<User> users = new HashSet<>();
+
     public Role() {
     }
 
@@ -22,12 +27,12 @@ public class Role implements Serializable {
         this.setAuthority(authority);
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getAuthority() {
@@ -36,6 +41,10 @@ public class Role implements Serializable {
 
     public void setAuthority(String authority) {
         this.authority = authority;
+    }
+
+    public Set<User> getUsers() {
+        return users;
     }
 
     @Override
