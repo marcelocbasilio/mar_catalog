@@ -3,6 +3,7 @@ package com.marcelocbasilio.catalog.controllers;
 import com.marcelocbasilio.catalog.dtos.UserDto;
 import com.marcelocbasilio.catalog.dtos.UserInsertDto;
 import com.marcelocbasilio.catalog.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -32,14 +33,14 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> insert(@RequestBody UserInsertDto dto) {
+    public ResponseEntity<UserDto> insert(@Valid @RequestBody UserInsertDto dto) {
         UserDto newDto = userService.insert(dto);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newDto.getId()).toUri();
         return ResponseEntity.created(uri).body(newDto);
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<UserDto> update(@PathVariable Long id, @RequestBody UserDto dto) {
+    public ResponseEntity<UserDto> update(@PathVariable Long id, @Valid @RequestBody UserDto dto) {
         dto = userService.update(id, dto);
         return ResponseEntity.ok().body(dto);
     }

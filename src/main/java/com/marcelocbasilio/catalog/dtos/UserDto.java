@@ -1,6 +1,9 @@
 package com.marcelocbasilio.catalog.dtos;
 
 import com.marcelocbasilio.catalog.entities.User;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -8,9 +11,14 @@ import java.util.Objects;
 import java.util.Set;
 
 public class UserDto implements Serializable {
+
     private Long id;
+
+    @NotBlank(message = "Campo primeiro nome obrigatório")
     private String firstName;
     private String lastName;
+
+    @Email(message = "Por favor entrar um e-mail válido!")
     private String email;
 
     Set<RoleDto> roles = new HashSet<>();
@@ -30,7 +38,8 @@ public class UserDto implements Serializable {
         user.getRoles().forEach(role -> this.roles.add(new RoleDto(role)));
     }
 
-    public UserDto() {}
+    public UserDto() {
+    }
 
     public Long getId() {
         return id;
