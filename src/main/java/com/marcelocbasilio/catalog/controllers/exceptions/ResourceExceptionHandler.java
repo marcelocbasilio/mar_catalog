@@ -1,15 +1,18 @@
 package com.marcelocbasilio.catalog.controllers.exceptions;
 
-import com.marcelocbasilio.catalog.services.exceptions.DatabaseException;
-import com.marcelocbasilio.catalog.services.exceptions.ResourceNotFoundException;
-import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.time.Instant;
+import com.marcelocbasilio.catalog.services.exceptions.DatabaseException;
+import com.marcelocbasilio.catalog.services.exceptions.ResourceNotFoundException;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
 public class ResourceExceptionHandler {
@@ -47,6 +50,10 @@ public class ResourceExceptionHandler {
         err.setError("Validation exception");
         err.setMessage(e.getMessage());
         err.setPath(request.getRequestURI());
+        
+        for(FieldError f : e.getBindingResult().getFieldErrors()) {
+        	//
+        }
         return ResponseEntity.status(status).body(err);
     }
 
