@@ -1,88 +1,87 @@
 package com.marcelocbasilio.catalog.dtos;
 
-import com.marcelocbasilio.catalog.entities.User;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import com.marcelocbasilio.catalog.entities.User;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 public class UserDto implements Serializable {
 
-    private Long id;
+	private static final long serialVersionUID = 1L;
 
-    @NotBlank(message = "Campo primeiro nome obrigatório")
-    private String firstName;
-    private String lastName;
+	private Long id;
 
-    @Email(message = "Por favor entrar um e-mail válido!")
-    private String email;
+	@NotBlank(message = "Campo primeiro nome obrigatório")
+	private String firstName;
+	private String lastName;
 
-    Set<RoleDto> roles = new HashSet<>();
+	@Email(message = "Por favor entrar um e-mail válido!")
+	private String email;
 
-    public UserDto(Long id, String firstName, String lastName, String email) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-    }
+	Set<RoleDto> roles = new HashSet<>();
 
-    public UserDto(User user) {
-        id = user.getId();
-        firstName = user.getFirstName();
-        lastName = user.getLastName();
-        email = user.getEmail();
-        user.getRoles().forEach(role -> this.roles.add(new RoleDto(role)));
-    }
+	public UserDto(Long id, String firstName, String lastName, String email) {
+		this.id = id;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.email = email;
+	}
 
-    public UserDto() {
-    }
+	public UserDto(User user) {
+		id = user.getId();
+		firstName = user.getFirstName();
+		lastName = user.getLastName();
+		email = user.getEmail();
+		user.getRoles().forEach(role -> this.roles.add(new RoleDto(role)));
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public UserDto() {
+	}
 
-    public String getFirstName() {
-        return firstName;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public String getLastName() {
-        return lastName;
-    }
+	public String getFirstName() {
+		return firstName;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public String getLastName() {
+		return lastName;
+	}
 
-    public Set<RoleDto> getRoles() {
-        return roles;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UserDto entity = (UserDto) o;
-        return Objects.equals(this.id, entity.id) &&
-                Objects.equals(this.firstName, entity.firstName) &&
-                Objects.equals(this.lastName, entity.lastName) &&
-                Objects.equals(this.email, entity.email);
-    }
+	public Set<RoleDto> getRoles() {
+		return roles;
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, firstName, lastName, email);
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		UserDto entity = (UserDto) o;
+		return Objects.equals(this.id, entity.id) && Objects.equals(this.firstName, entity.firstName)
+				&& Objects.equals(this.lastName, entity.lastName) && Objects.equals(this.email, entity.email);
+	}
 
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + "(" +
-                "id = " + id + ", " +
-                "firstName = " + firstName + ", " +
-                "lastName = " + lastName + ", " +
-                "email = " + email + ")";
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, firstName, lastName, email);
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "(" + "id = " + id + ", " + "firstName = " + firstName + ", "
+				+ "lastName = " + lastName + ", " + "email = " + email + ")";
+	}
 }

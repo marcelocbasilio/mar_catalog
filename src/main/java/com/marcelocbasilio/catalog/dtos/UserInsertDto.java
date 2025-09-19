@@ -1,18 +1,24 @@
 package com.marcelocbasilio.catalog.dtos;
 
+import com.marcelocbasilio.catalog.services.validation.UserInsertValid;
+
+@UserInsertValid
 public class UserInsertDto extends UserDto {
 
-    private String password;
+	private static final long serialVersionUID = 1L;
 
-    public UserInsertDto() {
-        super();
-    }
+	private String password;
 
-    public String getPassword() {
-        return password;
-    }
+	public UserInsertDto() {
+		super();
+	}
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
 }
