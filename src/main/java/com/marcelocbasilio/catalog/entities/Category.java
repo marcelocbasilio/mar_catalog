@@ -1,91 +1,98 @@
 package com.marcelocbasilio.catalog.entities;
 
-import jakarta.persistence.*;
-
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+
 @Entity
 @Table(name = "tb_category")
 public class Category {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
-    private Long id;
-    private String name;
 
-    @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
-    private Instant createdAt;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	private String name;
 
-    @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
-    private Instant updatedAt;
+	@Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
+	private Instant createdAt;
 
-    @ManyToMany(mappedBy = "categories")
-    private Set<Product> products = new HashSet<>();
+	@Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
+	private Instant updatedAt;
 
-    public Category() {
-    }
+	@ManyToMany(mappedBy = "categories")
+	private Set<Product> products = new HashSet<>();
 
-    public Category(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
+	public Category() {
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public Category(Long id, String name) {
+		this.id = id;
+		this.name = name;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
+	public Instant getCreatedAt() {
+		return createdAt;
+	}
 
-    public Set<Product> getProducts() {
-        return products;
-    }
+	public Instant getUpdatedAt() {
+		return updatedAt;
+	}
 
-    @PrePersist
-    public void prePersist() {
-        createdAt = Instant.now();
-    }
+	@PrePersist
+	public void prePersist() {
+		createdAt = Instant.now();
+	}
 
-    @PreUpdate
-    public void preUpdate() {
-        updatedAt = Instant.now();
-    }
+	@PreUpdate
+	public void preUpdate() {
+		updatedAt = Instant.now();
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+	public Set<Product> getProducts() {
+		return products;
+	}
 
-        Category category = (Category) o;
-        return Objects.equals(id, category.id);
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
-
-    @Override
-    public String toString() {
-        return "Category{" + "id=" + id + ", name='" + name + '\'' + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + '}';
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Category other = (Category) obj;
+		return Objects.equals(id, other.id);
+	}
 }

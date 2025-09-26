@@ -1,7 +1,9 @@
 package com.marcelocbasilio.catalog.services.exceptions;
 
 public class ResourceNotFoundException extends RuntimeException {
-    public ResourceNotFoundException(String message) {
-        super(message);
-    }
+	private static final long serialVersionUID = 1L;
+
+	public ResourceNotFoundException(String msg) {
+		super(msg);
+	}
 }

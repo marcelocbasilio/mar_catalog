@@ -1,21 +1,27 @@
 package com.marcelocbasilio.catalog.services;
 
+import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.marcelocbasilio.catalog.dtos.RoleDto;
-import com.marcelocbasilio.catalog.dtos.UserDto;
-import com.marcelocbasilio.catalog.dtos.UserInsertDto;
-import com.marcelocbasilio.catalog.dtos.UserUpdateDto;
+import com.marcelocbasilio.catalog.dtos.RoleDTO;
+import com.marcelocbasilio.catalog.dtos.UserDTO;
+import com.marcelocbasilio.catalog.dtos.UserInsertDTO;
+import com.marcelocbasilio.catalog.dtos.UserUpdateDTO;
 import com.marcelocbasilio.catalog.entities.Role;
 import com.marcelocbasilio.catalog.entities.User;
+import com.marcelocbasilio.catalog.projections.UserDetailsProjection;
 import com.marcelocbasilio.catalog.repositories.RoleRepository;
 import com.marcelocbasilio.catalog.repositories.UserRepository;
 import com.marcelocbasilio.catalog.services.exceptions.DatabaseException;
@@ -24,75 +30,91 @@ import com.marcelocbasilio.catalog.services.exceptions.ResourceNotFoundException
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
-	private final UserRepository userRepository;
-	private final RoleRepository roleRepository;
-	private final BCryptPasswordEncoder passwordEncoder;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
-	public UserService(UserRepository userRepository, RoleRepository roleRepository,
-			BCryptPasswordEncoder passwordEncoder) {
-		this.userRepository = userRepository;
-		this.roleRepository = roleRepository;
-		this.passwordEncoder = passwordEncoder;
+	@Autowired
+	private UserRepository repository;
+
+	@Autowired
+	private RoleRepository roleRepository;
+
+	@Transactional(readOnly = true)
+	public Page<UserDTO> findAllPaged(Pageable pageable) {
+		Page<User> list = repository.findAll(pageable);
+		return list.map(x -> new UserDTO(x));
 	}
 
 	@Transactional(readOnly = true)
-	public Page<UserDto> findAllPaged(Pageable pageable) {
-		Page<User> users = userRepository.findAll(pageable);
-		return users.map(UserDto::new);
-	}
-
-	@Transactional(readOnly = true)
-	public UserDto findById(Long id) {
-		Optional<User> optionalUser = userRepository.findById(id);
-		User user = optionalUser.orElseThrow(() -> new ResourceNotFoundException("[fbi] Entity not found."));
-		return new UserDto(user);
+	public UserDTO findById(Long id) {
+		Optional<User> obj = repository.findById(id);
+		User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Entity not found"));
+		return new UserDTO(entity);
 	}
 
 	@Transactional
-	public UserDto insert(UserInsertDto userInsertDto) {
-		User user = new User();
-		copyDtoToEntity(userInsertDto, user);
-		user.setPassword(passwordEncoder.encode(userInsertDto.getPassword()));
-		user = userRepository.save(user);
-		return new UserDto(user);
+	public UserDTO insert(UserInsertDTO dto) {
+		User entity = new User();
+		copyDtoToEntity(dto, entity);
+		entity.setPassword(passwordEncoder.encode(dto.getPassword()));
+		entity = repository.save(entity);
+		return new UserDTO(entity);
 	}
 
 	@Transactional
-	public UserDto update(Long id, UserUpdateDto userDto) {
+	public UserDTO update(Long id, UserUpdateDTO dto) {
 		try {
-			User user = userRepository.getReferenceById(id);
-			copyDtoToEntity(userDto, user);
-			user = userRepository.save(user);
-			return new UserDto(user);
+			User entity = repository.getReferenceById(id);
+			copyDtoToEntity(dto, entity);
+			entity = repository.save(entity);
+			return new UserDTO(entity);
 		} catch (EntityNotFoundException e) {
-			throw new ResourceNotFoundException("[upd] Id not found " + id);
+			throw new ResourceNotFoundException("Id not found " + id);
 		}
 	}
 
 	@Transactional(propagation = Propagation.SUPPORTS)
 	public void delete(Long id) {
-		if (!userRepository.existsById(id)) {
-			throw new ResourceNotFoundException("[dlt1] Resource not found " + id);
+		if (!repository.existsById(id)) {
+			throw new ResourceNotFoundException("Recurso não encontrado");
 		}
 		try {
-			userRepository.deleteById(id);
+			repository.deleteById(id);
 		} catch (DataIntegrityViolationException e) {
-			throw new DatabaseException("[dlt2] Referential Integrity Failure");
+			throw new DatabaseException("Falha de integridade referencial");
 		}
 	}
 
-	private void copyDtoToEntity(UserDto userDto, User user) {
-		user.setFirstName(userDto.getFirstName());
-		user.setLastName(userDto.getLastName());
-		user.setEmail(userDto.getEmail());
+	private void copyDtoToEntity(UserDTO dto, User entity) {
 
-		user.getRoles().clear();
-		for (RoleDto roleDto : userDto.getRoles()) {
+		entity.setFirstName(dto.getFirstName());
+		entity.setLastName(dto.getLastName());
+		entity.setEmail(dto.getEmail());
+
+		entity.getRoles().clear();
+		for (RoleDTO roleDto : dto.getRoles()) {
 			Role role = roleRepository.getReferenceById(roleDto.getId());
-			user.getRoles().add(role);
+			entity.getRoles().add(role);
 		}
 	}
 
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+		List<UserDetailsProjection> result = repository.searchUserAndRolesByEmail(username);
+		if (result.size() == 0) {
+			throw new UsernameNotFoundException("Email not found");
+		}
+
+		User user = new User();
+		user.setEmail(result.get(0).getUsername());
+		user.setPassword(result.get(0).getPassword());
+		for (UserDetailsProjection projection : result) {
+			user.addRole(new Role(projection.getRoleId(), projection.getAuthority()));
+		}
+
+		return user;
+	}
 }

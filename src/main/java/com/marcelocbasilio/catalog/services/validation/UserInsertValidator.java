@@ -5,29 +5,31 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.marcelocbasilio.catalog.controllers.exceptions.FieldMessage;
-import com.marcelocbasilio.catalog.dtos.UserInsertDto;
+import com.marcelocbasilio.catalog.dtos.UserInsertDTO;
 import com.marcelocbasilio.catalog.entities.User;
 import com.marcelocbasilio.catalog.repositories.UserRepository;
+import com.marcelocbasilio.catalog.resources.exceptions.FieldMessage;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class UserInsertValidator implements ConstraintValidator<UserInsertValid, UserInsertDto> {
+public class UserInsertValidator implements ConstraintValidator<UserInsertValid, UserInsertDTO> {
 
 	@Autowired
-	private UserRepository userRepository;
+	private UserRepository repository;
 
 	@Override
 	public void initialize(UserInsertValid ann) {
 	}
 
 	@Override
-	public boolean isValid(UserInsertDto dto, ConstraintValidatorContext context) {
+	public boolean isValid(UserInsertDTO dto, ConstraintValidatorContext context) {
+
 		List<FieldMessage> list = new ArrayList<>();
-		User user = userRepository.findByEmail(dto.getEmail());
+
+		User user = repository.findByEmail(dto.getEmail());
 		if (user != null) {
-			list.add(new FieldMessage("email", "E-mail já existe!"));
+			list.add(new FieldMessage("email", "Email já existe"));
 		}
 
 		for (FieldMessage e : list) {
@@ -37,5 +39,4 @@ public class UserInsertValidator implements ConstraintValidator<UserInsertValid,
 		}
 		return list.isEmpty();
 	}
-
 }
